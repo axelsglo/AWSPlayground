@@ -1,0 +1,101 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: 'axel-first-sam-project
+
+  Sample SAM Template for axel-first-sam-project
+
+  '
+Globals:
+  Function:
+    Timeout: 3
+    MemorySize: 128
+    Tracing: Active
+    LoggingConfig:
+      LogFormat: JSON
+  Api:
+    TracingEnabled: true
+Resources:
+  HelloWorldFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: s3://axel-first-sam-project/d9e72ec8965cab99f233c02c9af1cced
+      Handler: app.lambdaHandler
+      Runtime: nodejs18.x
+      Architectures:
+      - x86_64
+      Events:
+        HelloWorld:
+          Type: Api
+          Properties:
+            Path: /hello
+            Method: get
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: true
+        Target: es2020
+        EntryPoints:
+        - app.ts
+      SamResourceId: HelloWorldFunction
+  ClockFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: s3://axel-first-sam-project/6fcd87b1b6d58a18c78b835530408521
+      Handler: handler.clock
+      Runtime: nodejs18.x
+      Events:
+        ClockApi:
+          Type: Api
+          Properties:
+            Path: /clock
+            Method: get
+    Metadata:
+      SamResourceId: ClockFunction
+  ClockConvertTimeFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: s3://axel-first-sam-project/d82ca055b32fea966993d4b7ea99f779
+      Handler: handler.clock
+      Runtime: nodejs18.x
+      Events:
+        ClockApi:
+          Type: Api
+          Properties:
+            Path: /clock/convert-time
+            Method: get
+    Metadata:
+      SamResourceId: ClockConvertTimeFunction
+  ApplicationResourceGroup:
+    Type: AWS::ResourceGroups::Group
+    Properties:
+      Name:
+        Fn::Sub: ApplicationInsights-SAM-${AWS::StackName}
+      ResourceQuery:
+        Type: CLOUDFORMATION_STACK_1_0
+    Metadata:
+      SamResourceId: ApplicationResourceGroup
+  ApplicationInsightsMonitoring:
+    Type: AWS::ApplicationInsights::Application
+    Properties:
+      ResourceGroupName:
+        Ref: ApplicationResourceGroup
+      AutoConfigurationEnabled: 'true'
+    Metadata:
+      SamResourceId: ApplicationInsightsMonitoring
+Outputs:
+  HelloWorldApi:
+    Description: API Gateway endpoint URL for Prod stage for Hello World function
+    Value:
+      Fn::Sub: https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/hello/
+  HelloWorldFunctionArn:
+    Description: Hello World Lambda Function ARN
+    Value:
+      Fn::GetAtt:
+      - HelloWorldFunction
+      - Arn
+  ClockFunctionArn:
+    Description: ARN of the ClockFunction Lambda function
+    Value:
+      Fn::GetAtt:
+      - ClockFunction
+      - Arn

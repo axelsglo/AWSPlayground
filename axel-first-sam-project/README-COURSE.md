@@ -37,3 +37,7 @@
 * Go to your AWS console and your should see your new stack created in the cloudformation service
 * Now you can test your api gateway with postman
 * To check logs for your functions: `sam logs --name CLockFunction --stack-name`
+
+## DELETE STACK
+
+Run `aws cloudformation delete-stack --stack-name axel-first-sam-project`.
